@@ -1,6 +1,10 @@
 import os
 import json
 import shutil
+import requests
+
+# Correct GitHub URL
+GITHUB_JSON_URL = "https://github.com/kxdekxde/browndust2-icon-replacer/raw/refs/heads/main/AddressablesJSON/GeneratedJSON/illust.json"
 
 # Get the current script's directory
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -11,8 +15,26 @@ gamfs_path = os.path.join(os.path.expanduser("~"), "AppData", "LocalLow", "Unity
 modded_bundles_path = os.path.join(script_dir, "Modded Bundles")
 original_bundles_path = os.path.join(script_dir, "Original Bundles")
 
-# Ensure the original bundles directory exists
-os.makedirs(original_bundles_path, exist_ok=True)
+def check_for_updates():
+    """Check for updates from GitHub and replace local file directly."""
+    try:
+        print("Checking for JSON updates from GitHub...")
+        response = requests.get(GITHUB_JSON_URL)
+        response.raise_for_status()
+        remote_data = response.json()
+        
+        # Ensure directory exists
+        os.makedirs(os.path.dirname(json_file_path), exist_ok=True)
+        
+        # Replace local file directly
+        with open(json_file_path, 'w') as f:
+            json.dump(remote_data, f, indent=2)
+        print("JSON file updated successfully.")
+        return True
+        
+    except Exception as e:
+        print(f"Error updating JSON file: {e}")
+        return False
 
 def load_json(file_path):
     """Load JSON data from a file."""
@@ -40,17 +62,16 @@ def omit_existing_folder(dest_folder):
     if os.path.exists(dest_folder):
         user_input = get_user_input(f"The folder '{dest_folder}' already exists in the destination folder, do you wish to overwrite it? (Yes/No): ")
         if user_input == "yes":
-            # Remove the existing folder before copying
             try:
-                shutil.rmtree(dest_folder)  # Remove the folder and its contents
+                shutil.rmtree(dest_folder)
                 print(f"Existing folder '{dest_folder}' has been removed.")
-                return False  # Proceed with overwriting
+                return False
             except Exception as e:
                 print(f"Error removing existing folder '{dest_folder}': {e}")
-                return True  # Skip if we can't remove the folder
+                return True
         else:
             print(f"Skipping folder: {dest_folder}.")
-            return True  # Skip if no overwrite
+            return True
     return False
 
 def find_and_copy_matching_folders(source_path, target_path, dest_path):
@@ -63,7 +84,6 @@ def find_and_copy_matching_folders(source_path, target_path, dest_path):
         if os.path.isdir(folder_path) and folder_name in target_folders:
             dest_folder = os.path.join(dest_path, folder_name)
 
-            # Skip if the folder already exists in the destination and the user doesn't want to overwrite
             if omit_existing_folder(dest_folder):
                 continue
 
@@ -78,6 +98,12 @@ def find_and_copy_matching_folders(source_path, target_path, dest_path):
     print("Copy process completed.")
 
 def main():
+    # Ensure the original bundles directory exists
+    os.makedirs(original_bundles_path, exist_ok=True)
+
+    # Check and update JSON file
+    check_for_updates()
+    
     # Load JSON data
     json_data = load_json(json_file_path)
 
