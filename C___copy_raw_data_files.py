@@ -4,7 +4,7 @@ import shutil
 import requests
 
 # Correct GitHub URL
-GITHUB_JSON_URL = "https://github.com/kxdekxde/browndust2-icon-replacer/raw/refs/heads/main/AddressablesJSON/GeneratedJSON/illust.json"
+GITHUB_JSON_URL = "https://raw.githubusercontent.com/kxdekxde/browndust2-icon-replacer/refs/heads/main/AddressablesJSON/GeneratedJSON/illust.json"
 
 # Get the current script's directory
 script_dir = os.path.dirname(os.path.abspath(__file__))
